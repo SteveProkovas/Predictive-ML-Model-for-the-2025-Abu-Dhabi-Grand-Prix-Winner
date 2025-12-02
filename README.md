@@ -1,0 +1,2 @@
+# Predictive-ML-Model-for-the-2025-Abu-Dhabi-Grand-Prix-Winner
+We will build an end-to-end ML pipeline to output calibrated win probabilities and a top-5 ranking of drivers for the 2025 Abu Dhabi GP (Yas Marina, 17:00 local). The core tasks are data gathering, feature engineering, model training/calibration, evaluation, and explainability. We will use open data sources and CPU-friendly algorithms.
