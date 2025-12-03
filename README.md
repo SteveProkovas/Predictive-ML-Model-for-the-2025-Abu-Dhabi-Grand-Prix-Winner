@@ -318,43 +318,6 @@ flowchart TD
 - **Mechanical failure rate**: 8.7% (championship decider average)
 - **Event modeling**: Includes collisions, strategy gambles, weather effects
 
-### 4. Championship Rules Engine (`championship_rules.py`)
-**Purpose**: Apply championship scenario logic based on provided screenshots
-
-```mermaid
-flowchart TD
-    A[Input: Finishing Positions<br>Piastri, Norris, Verstappen] --> B{Piastri Scenarios}
-    
-    B --> C[Piastri P1 &<br>Norris P6- & Verstappen P2-]
-    C --> D[🎉 Piastri Champion]
-    
-    B --> E{Piastri P2 &<br>Norris P10- & Verstappen P4-]
-    E --> D
-    
-    B --> F[Check Norris<br>Scenarios]
-    
-    F --> G[Norris P1/P2/P3]
-    G --> H[🎉 Norris Champion]
-    
-    F --> I[Norris P4 &<br>Verstappen P2-]
-    I --> H
-    
-    F --> J[... Other Norris<br>scenarios ...]
-    J --> H
-    
-    F --> K[Check Verstappen<br>Scenarios]
-    
-    K --> L[Verstappen P1 &<br>Norris P4-]
-    L --> M[🎉 Verstappen Champion]
-    
-    K --> N[Verstappen P2 &<br>Norris P8- & Piastri P3-]
-    N --> M
-    
-    K --> O[Calculate<br>Final Points]
-    O --> P{Compare Points}
-    P --> Q[Highest Points<br>Wins Championship]
-```
-
 ## 📊 Model Performance & Accuracy
 
 ### Historical Validation Results
