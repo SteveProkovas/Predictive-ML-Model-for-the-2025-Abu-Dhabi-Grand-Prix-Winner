@@ -153,17 +153,6 @@ Oscar Piastri:      3.47%
 Historical Comparison: +2.75% above average
 ```
 
-## 📊 Historical Pattern Analysis
-
-```mermaid
-pie title Championship Outcomes by Lead Type (1990-2022)
-    "Small Lead Wins" : 7
-    "Small Lead Losses" : 3
-    "Medium Lead Wins" : 4
-    "Medium Lead Losses" : 2
-    "Large Lead Wins" : 5
-    "Large Lead Losses" : 2
-```
 
 ## 🔧 System Components Diagram
 
