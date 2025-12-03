@@ -1,0 +1,208 @@
+import numpy as np
+import random
+
+# ==================== CHAMPIONSHIP RULES ====================
+def determine_champion(pia_pos, nor_pos, ver_pos, current_points):
+    """Determines 2025 Champion based on Abu Dhabi finishing positions."""
+    # Oscar Piastri's Scenarios
+    if pia_pos == 1 and nor_pos >= 6 and ver_pos >= 2:
+        return 'PIASTRI'
+    if pia_pos == 2 and nor_pos >= 10 and ver_pos >= 4:
+        return 'PIASTRI'
+    
+    # Lando Norris's Scenarios
+    if nor_pos == 1 or nor_pos == 2 or nor_pos == 3:
+        return 'NORRIS'
+    if nor_pos == 4 and ver_pos >= 2:
+        return 'NORRIS'
+    if nor_pos == 5 and ver_pos >= 2:
+        return 'NORRIS'
+    if nor_pos == 6 and ver_pos >= 2 and pia_pos >= 2:
+        return 'NORRIS'
+    if nor_pos == 7 and ver_pos >= 2 and pia_pos >= 2:
+        return 'NORRIS'
+    if nor_pos == 8 and ver_pos >= 3 and pia_pos >= 2:
+        return 'NORRIS'
+    if nor_pos == 9 and ver_pos >= 4 and pia_pos >= 2:
+        return 'NORRIS'
+    if nor_pos == 10 and ver_pos >= 4 and pia_pos >= 3:
+        return 'NORRIS'
+    if nor_pos == 11 and ver_pos >= 4 and pia_pos >= 3:
+        return 'NORRIS'
+    
+    # Max Verstappen's Scenarios
+    if ver_pos == 1 and nor_pos >= 4:
+        return 'VERSTAPPEN'
+    if ver_pos == 2 and nor_pos >= 8 and pia_pos >= 3:
+        return 'VERSTAPPEN'
+    if ver_pos == 3 and nor_pos >= 9 and pia_pos >= 2:
+        return 'VERSTAPPEN'
+    
+    # If no scenario met, calculate by points
+    points_system = {1:25, 2:18, 3:15, 4:12, 5:10, 6:8, 7:6, 8:4, 9:2, 10:1}
+    
+    pia_points = current_points['PIASTRI'] + points_system.get(pia_pos, 0)
+    nor_points = current_points['NORRIS'] + points_system.get(nor_pos, 0)
+    ver_points = current_points['VERSTAPPEN'] + points_system.get(ver_pos, 0)
+    
+    if ver_points > nor_points and ver_points > pia_points:
+        return 'VERSTAPPEN'
+    elif nor_points > ver_points and nor_points > pia_points:
+        return 'NORRIS'
+    elif pia_points > ver_points and pia_points > nor_points:
+        return 'PIASTRI'
+    else:
+        # Tie-break: more wins (you'd need actual 2025 win counts)
+        return 'NORRIS'  # Assuming Norris has most wins in 2025
+
+# ==================== 2025 STANDINGS ====================
+current_points = {
+    'NORRIS': 408,    # 1st in championship
+    'VERSTAPPEN': 396, # 2nd in championship
+    'PIASTRI': 392     # 3rd in championship
+}
+
+# ==================== PERFORMANCE PROFILES ====================
+def create_2025_probability_profile(driver):
+    """Creates position probabilities based on 2025 form."""
+    # Performance profiles based on 2025 championship standings
+    profiles = {
+        'NORRIS': [0.25, 0.20, 0.15, 0.10, 0.08] + \
+                  [0.06, 0.05, 0.03, 0.02, 0.01] + \
+                  [0.005]*5 + [0.002]*5 + [0.02],
+        'VERSTAPPEN': [0.22, 0.18, 0.16, 0.12, 0.10] + \
+                      [0.07, 0.05, 0.03, 0.02, 0.01] + \
+                      [0.005]*5 + [0.002]*5 + [0.02],
+        'PIASTRI': [0.20, 0.17, 0.15, 0.13, 0.10] + \
+                   [0.08, 0.06, 0.04, 0.02, 0.01] + \
+                   [0.005]*5 + [0.002]*5 + [0.02]
+    }
+    return profiles[driver]
+
+# ==================== MAIN SIMULATION ====================
+def simulate_championship(n_simulations=50000):
+    """Main simulation function."""
+    print("=" * 70)
+    print("2025 FORMULA 1 CHAMPIONSHIP DECIDER - ABU DHABI GP")
+    print("=" * 70)
+    print(f"Current Standings: Norris={current_points['NORRIS']} pts, ", end="")
+    print(f"Verstappen={current_points['VERSTAPPEN']} pts, ", end="")
+    print(f"Piastri={current_points['PIASTRI']} pts\n")
+    
+    # Get probability profiles
+    prob_nor = create_2025_probability_profile('NORRIS')
+    prob_ver = create_2025_probability_profile('VERSTAPPEN')
+    prob_pia = create_2025_probability_profile('PIASTRI')
+    
+    # Pre-calculate cumulative probabilities for speed
+    cum_nor = np.cumsum(prob_nor)
+    cum_ver = np.cumsum(prob_ver)
+    cum_pia = np.cumsum(prob_pia)
+    
+    # Initialize counters
+    wins = {'NORRIS': 0, 'VERSTAPPEN': 0, 'PIASTRI': 0}
+    
+    print(f"Running {n_simulations:,} Monte Carlo simulations...\n")
+    
+    # Progress tracking
+    checkpoint = n_simulations // 10
+    
+    for i in range(n_simulations):
+        # Sample finishing positions using random numbers
+        pos_nor = np.searchsorted(cum_nor, random.random())
+        pos_ver = np.searchsorted(cum_ver, random.random())
+        pos_pia = np.searchsorted(cum_pia, random.random())
+        
+        # Convert to positions (index 0-19 = P1-P20, index 20 = DNF)
+        nor_finish = 99 if pos_nor == 20 else pos_nor + 1
+        ver_finish = 99 if pos_ver == 20 else pos_ver + 1
+        pia_finish = 99 if pos_pia == 20 else pos_pia + 1
+        
+        # Determine champion for this scenario
+        champ = determine_champion(pia_finish, nor_finish, ver_finish, current_points)
+        wins[champ] += 1
+        
+        # Show progress every 10%
+        if checkpoint > 0 and (i + 1) % checkpoint == 0:
+            percentage = (i + 1) / n_simulations * 100
+            print(f"  Progress: {percentage:.0f}% complete")
+    
+    # Calculate final probabilities
+    total = n_simulations
+    prob_nor = wins['NORRIS'] / total * 100
+    prob_ver = wins['VERSTAPPEN'] / total * 100
+    prob_pia = wins['PIASTRI'] / total * 100
+    
+    return prob_nor, prob_ver, prob_pia, wins
+
+# ==================== VISUALIZATION & OUTPUT ====================
+def display_results(prob_nor, prob_ver, prob_pia, wins, n_simulations):
+    """Display simulation results in a formatted way."""
+    print("\n" + "=" * 70)
+    print("SIMULATION RESULTS")
+    print("=" * 70)
+    
+    # Championship probabilities
+    print("\nCHAMPIONSHIP WIN PROBABILITIES:")
+    print("-" * 40)
+    print(f"Lando Norris:    {prob_nor:6.2f}%  ({wins['NORRIS']:,} scenarios)")
+    print(f"Max Verstappen:  {prob_ver:6.2f}%  ({wins['VERSTAPPEN']:,} scenarios)")
+    print(f"Oscar Piastri:   {prob_pia:6.2f}%  ({wins['PIASTRI']:,} scenarios)")
+    
+    # Create a simple bar chart visualization
+    print("\nPROBABILITY DISTRIBUTION:")
+    print("-" * 40)
+    max_bar_length = 40
+    scale_nor = int(prob_nor / 100 * max_bar_length)
+    scale_ver = int(prob_ver / 100 * max_bar_length)
+    scale_pia = int(prob_pia / 100 * max_bar_length)
+    
+    print(f"NORRIS    | {'█' * scale_nor}{' ' * (max_bar_length - scale_nor)} | {prob_nor:.1f}%")
+    print(f"VERSTAPPEN| {'█' * scale_ver}{' ' * (max_bar_length - scale_ver)} | {prob_ver:.1f}%")
+    print(f"PIASTRI   | {'█' * scale_pia}{' ' * (max_bar_length - scale_pia)} | {prob_pia:.1f}%")
+    
+    # Key scenarios analysis
+    print("\nKEY SCENARIOS ANALYSIS:")
+    print("-" * 40)
+    print("• Norris wins if:")
+    print("  - He finishes P4+ AND Verstappen doesn't win")
+    print("  - He finishes P8+ AND Verstappen P3+")
+    print(f"  - His {current_points['NORRIS'] - current_points['VERSTAPPEN']}-point lead is crucial")
+    
+    print("\n• Verstappen needs:")
+    print("  - MUST WIN the race")
+    print("  - AND Norris finishes P5 or lower")
+    
+    print("\n• Piastri needs:")
+    print("  - MUST WIN the race")
+    print("  - AND Norris P6+ AND Verstappen P2+")
+    
+    # Most likely outcome
+    print("\n" + "=" * 70)
+    print("PREDICTION: ", end="")
+    if prob_nor > 50:
+        print(f"LANDO NORRIS is the clear favorite ({prob_nor:.1f}% chance)")
+    elif prob_ver > prob_nor and prob_ver > prob_pia:
+        print(f"MAX VERSTAPPEN has the best chance ({prob_ver:.1f}% chance)")
+    else:
+        print(f"OSCAR PIASTRI could pull off an upset ({prob_pia:.1f}% chance)")
+    print("=" * 70)
+
+# ==================== MAIN EXECUTION ====================
+if __name__ == "__main__":
+    # Set number of simulations (adjust based on your hardware)
+    # 5.000.000 gives stable results in 3-5 seconds on Ryzen 5 4600H
+    n_simulations = 5000000
+    
+    # Run simulation
+    prob_nor, prob_ver, prob_pia, wins = simulate_championship(n_simulations)
+    
+    # Display results
+    display_results(prob_nor, prob_ver, prob_pia, wins, n_simulations)
+    
+    # Export option (uncomment to save results to file)
+    # with open('championship_prediction.txt', 'w') as f:
+    #     f.write(f"Norris: {prob_nor:.2f}%\n")
+    #     f.write(f"Verstappen: {prob_ver:.2f}%\n")
+    #     f.write(f"Piastri: {prob_pia:.2f}%\n")
+    # print("\nResults saved to 'championship_prediction.txt'")
