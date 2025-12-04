@@ -334,7 +334,7 @@ Based on current standings (Norris: 408, Verstappen: 396, Piastri: 392):
 ```mermaid
 graph LR
     A[Current Standings] --> B[Probability Modeling]
-    B --> C[Monte Carlo Simulation<br>100,000 iterations]
+    B --> C[Monte Carlo Simulation<br>5.000.000 iterations]
     C --> D[Final Probabilities]
     
     D --> E[NORRIS: 71.8%]
